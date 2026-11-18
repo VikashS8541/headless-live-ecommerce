@@ -3,6 +3,7 @@ import { memo } from 'react'
 import Icon from './Icon.jsx'
 import Stars from './ui/Stars.jsx'
 import { useWishlist } from '../lib/wishlist.js'
+import { useText } from '../lib/text.js'
 
 const slugify = name => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
@@ -11,6 +12,7 @@ const slugify = name => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/
  * or with plain text props (the slug is then made from the name).
  */
 function ProductCard({ id, name, slug, image, imageSrcSet, category, tone = 't1', badges = [], wished = false, swatches = [], price, rating = 0, reviews = 0, was, off, className = '' }) {
+  const tx = useText()
   const wishlist = useWishlist()
   const saved = id != null ? wishlist.has(id) : wished
   const to = `/product/${slug || slugify(name)}`
@@ -31,13 +33,13 @@ function ProductCard({ id, name, slug, image, imageSrcSet, category, tone = 't1'
         )}
         <button
           className={`wish ${saved ? 'is-on' : ''}`.trim()}
-          aria-label={saved ? 'Remove from wishlist' : 'Add to wishlist'}
+          aria-label={saved ? tx('wishlist_remove') : tx('wishlist_add')}
           aria-pressed={saved}
           onClick={() => id != null && wishlist.toggle(id)}
         >
           <Icon name="heart" size={18} />
         </button>
-        <Link to={to} className="quick grid place-items-center no-underline">Quick view</Link>
+        <Link to={to} className="quick grid place-items-center no-underline">{tx('quick_view')}</Link>
       </div>
       <div className="pc-b">
         <span className="cat">{category}</span>

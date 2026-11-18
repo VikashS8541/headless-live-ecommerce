@@ -5,6 +5,7 @@ import EmptyState from '../components/ui/EmptyState.jsx'
 import Html from '../components/ui/Html.jsx'
 import { usePage } from '../api/hooks.js'
 import { cleanHtml, stripHtml } from '../lib/format.js'
+import { useText } from '../lib/text.js'
 
 const WRAP = 'mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8'
 
@@ -26,6 +27,7 @@ function prepare(html) {
  *   /policies/returns  ->  WordPress page with slug "returns"
  */
 export default function PolicyPage() {
+  const tx = useText()
   const { slug } = useParams()
   const { data: page, isLoading } = usePage(slug)
   const title = page ? stripHtml(page.title.rendered) : ''
@@ -45,8 +47,8 @@ export default function PolicyPage() {
     <Layout>
       <section className="pg-hero">
         <div className={WRAP}>
-          <nav className="crumbs" aria-label="Breadcrumb">
-            <Link to="/">Home</Link>
+          <nav className="crumbs" aria-label={tx('bc_label')}>
+            <Link to="/">{tx('bc_home')}</Link>
             <svg className="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
             <span aria-current="page">{title || '…'}</span>
           </nav>
@@ -60,7 +62,7 @@ export default function PolicyPage() {
         <div className={WRAP}>
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr] lg:gap-16">
             {toc.length > 0 && (
-              <nav className="snav h-fit" aria-label="On this page">
+              <nav className="snav h-fit" aria-label={tx('policy_toc')}>
                 {toc.map((t, i) => <a key={t.id} className={i === 0 ? 'on' : 'x'} href={`#${t.id}`}>{t.text}</a>)}
               </nav>
             )}

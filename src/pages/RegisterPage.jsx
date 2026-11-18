@@ -5,8 +5,10 @@ import Logo from '../components/Logo.jsx'
 import Field from '../components/ui/Field.jsx'
 import { useAuth } from '../api/hooks.js'
 import { errorMessage } from '../api/errors.js'
+import { useText } from '../lib/text.js'
 
 export default function RegisterPage() {
+  const tx = useText()
   const { register } = useAuth()
   const navigate = useNavigate()
   const state = useLocation().state
@@ -18,11 +20,11 @@ export default function RegisterPage() {
   const submit = e => {
     e.preventDefault()
     const v = {}
-    if (!f.name.trim()) v.name = 'Enter your full name.'
-    if (!/^\S+@\S+\.\S+$/.test(f.email)) v.email = 'Enter a valid email address.'
-    if (f.password.length < 8) v.password = 'Use at least 8 characters.'
-    if (f.confirm !== f.password) v.confirm = 'The passwords do not match.'
-    if (!f.terms) v.terms = 'Please accept the terms to continue.'
+    if (!f.name.trim()) v.name = tx('err_full_name')
+    if (!/^\S+@\S+\.\S+$/.test(f.email)) v.email = tx('err_email')
+    if (f.password.length < 8) v.password = tx('err_password')
+    if (f.confirm !== f.password) v.confirm = tx('err_confirm')
+    if (!f.terms) v.terms = tx('err_terms')
     setErrors(v)
     setServerError('')
     if (Object.keys(v).length) return
@@ -37,20 +39,20 @@ export default function RegisterPage() {
       <form onSubmit={submit} noValidate className="card flex flex-col gap-4 p-8">
         <div><Logo /></div>
         <div>
-          <h2 className="h3">Create account</h2>
-          <p className="mt-2 text-sm leading-[22px] text-ink-muted">Join for faster checkout and member offers.</p>
+          <h2 className="h3">{tx('reg_title')}</h2>
+          <p className="mt-2 text-sm leading-[22px] text-ink-muted">{tx('reg_text')}</p>
         </div>
         {serverError && <div className="alert err" role="alert"><div>{serverError}</div></div>}
-        <Field label="Full name" error={errors.name}><input className={`input ${errors.name ? 'is-error' : ''}`} autoComplete="name" value={f.name} onChange={set('name')} /></Field>
-        <Field label="Email" error={errors.email}><input className={`input ${errors.email ? 'is-error' : ''}`} type="email" autoComplete="email" value={f.email} onChange={set('email')} /></Field>
-        <Field label="Password" error={errors.password} hint="At least 8 characters"><input className={`input ${errors.password ? 'is-error' : ''}`} type="password" autoComplete="new-password" value={f.password} onChange={set('password')} /></Field>
-        <Field label="Confirm password" error={errors.confirm}><input className={`input ${errors.confirm ? 'is-error' : ''}`} type="password" autoComplete="new-password" value={f.confirm} onChange={set('confirm')} /></Field>
+        <Field label={tx('f_full_name')} error={errors.name}><input className={`input ${errors.name ? 'is-error' : ''}`} autoComplete="name" value={f.name} onChange={set('name')} /></Field>
+        <Field label={tx('f_email')} error={errors.email}><input className={`input ${errors.email ? 'is-error' : ''}`} type="email" autoComplete="email" value={f.email} onChange={set('email')} /></Field>
+        <Field label={tx('f_password')} error={errors.password} hint={tx('f_password_hint')}><input className={`input ${errors.password ? 'is-error' : ''}`} type="password" autoComplete="new-password" value={f.password} onChange={set('password')} /></Field>
+        <Field label={tx('f_confirm_password')} error={errors.confirm}><input className={`input ${errors.confirm ? 'is-error' : ''}`} type="password" autoComplete="new-password" value={f.confirm} onChange={set('confirm')} /></Field>
         <div>
-          <label className="chk"><input type="checkbox" checked={f.terms} onChange={set('terms')} />I agree to the <Link to="/policies/terms">Terms</Link> and <Link to="/policies/privacy">Privacy Policy</Link></label>
+          <label className="chk"><input type="checkbox" checked={f.terms} onChange={set('terms')} />{tx('reg_agree')} <Link to="/policies/terms">{tx('reg_terms')}</Link> {tx('and')} <Link to="/policies/privacy">{tx('reg_privacy')}</Link></label>
           {errors.terms && <span className="msg err mt-2" role="alert">{errors.terms}</span>}
         </div>
-        <button className={`btn btn-primary btn-block ${register.isPending ? 'is-loading' : ''}`} disabled={register.isPending}>{register.isPending ? 'Creating account' : 'Create account'}</button>
-        <p className="text-center text-sm leading-[22px] text-ink-muted">Already a member? <Link to="/login" state={state}>Log in</Link></p>
+        <button className={`btn btn-primary btn-block ${register.isPending ? 'is-loading' : ''}`} disabled={register.isPending}>{register.isPending ? tx('reg_busy') : tx('reg_btn')}</button>
+        <p className="text-center text-sm leading-[22px] text-ink-muted">{tx('reg_member')} <Link to="/login" state={state}>{tx('reg_login')}</Link></p>
       </form>
     </AuthLayout>
   )

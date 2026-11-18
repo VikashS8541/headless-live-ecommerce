@@ -6,6 +6,7 @@ import ProductGrid from '../components/ui/ProductGrid.jsx'
 import { useCart, useCartActions, useProducts, useSite } from '../api/hooks.js'
 import { errorMessage } from '../api/errors.js'
 import { formatPrice, stripHtml } from '../lib/format.js'
+import { useText } from '../lib/text.js'
 
 const WRAP = 'mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8'
 const SECTION = 'pt-12 pb-12 md:pt-16 md:pb-16 lg:pt-24 lg:pb-24'
@@ -13,6 +14,7 @@ const SECTION = 'pt-12 pb-12 md:pt-16 md:pb-16 lg:pt-24 lg:pb-24'
 const BAR = { 0: 'w-0', 10: 'w-[10%]', 20: 'w-[20%]', 30: 'w-[30%]', 40: 'w-[40%]', 50: 'w-[50%]', 60: 'w-[60%]', 70: 'w-[70%]', 80: 'w-[80%]', 90: 'w-[90%]', 100: 'w-full' }
 
 export default function CartPage() {
+  const tx = useText()
   const { data: cart, isLoading, isError } = useCart()
   const { data: site } = useSite()
   const FREE_SHIPPING_ABOVE = Number(site?.options?.free_shipping_threshold) || 0 // set in WordPress: Aurelo Content > Cart
@@ -22,7 +24,7 @@ export default function CartPage() {
 
   if (isLoading) return <Layout><section className={`${SECTION} ${WRAP}`}><div className="sk h-64" /></section></Layout>
   if (isError) {
-    return <Layout><section className={`${SECTION} ${WRAP}`}><EmptyState icon="bag" title="We could not load your cart" text="Please refresh the page." /></section></Layout>
+    return <Layout><section className={`${SECTION} ${WRAP}`}><EmptyState icon="bag" title={tx('cart_load_error_title')} text={tx('cart_load_error_text')} /></section></Layout>
   }
 
   const items = cart.items || []
@@ -48,15 +50,15 @@ export default function CartPage() {
     <Layout>
       <section className={SECTION}>
         <div className={WRAP}>
-          <h1 className="h1">Your cart <span className="text-[20px] text-ink-muted">({cart.items_count} {cart.items_count === 1 ? 'item' : 'items'})</span></h1>
+          <h1 className="h1">{tx('cart_title')} <span className="text-[20px] text-ink-muted">({cart.items_count === 1 ? tx('cart_item_one', { count: cart.items_count }) : tx('cart_item_many', { count: cart.items_count })})</span></h1>
           <div className="mt-8 grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_420px] lg:gap-16">
             <div>
               {FREE_SHIPPING_ABOVE > 0 && (
                 <>
                   {away > 0 ? (
-                    <p className="text-sm leading-[22px]">You are <b>₹{Math.ceil(away).toLocaleString('en-IN')}</b> away from free shipping</p>
+                    <p className="text-sm leading-[22px]">{tx('cart_ship_away', { amount: (t.currency_symbol ?? '₹') + Math.ceil(away).toLocaleString('en-IN') })}</p>
                   ) : (
-                    <p className="text-sm leading-[22px]"><b>You have free shipping</b></p>
+                    <p className="text-sm leading-[22px]"><b>{tx('cart_ship_free')}</b></p>
                   )}
                   <div className="ship-bar mt-2"><i className={BAR[Math.floor(pct / 10) * 10]} /></div>
                 </>
@@ -73,13 +75,13 @@ export default function CartPage() {
                         <div className="nm text-[17px]">{slug ? <Link to={`/product/${slug}`} className="no-underline">{stripHtml(it.name)}</Link> : stripHtml(it.name)}</div>
                         {it.variation?.length > 0 && <div className="meta">{it.variation.map(v => v.value).join(' · ')}</div>}
                         <div className="mt-3 flex items-center gap-4">
-                          <button className="btn btn-ghost h-8 p-0 text-sm leading-[22px]" onClick={() => remove.mutate(it.key)}>Remove</button>
+                          <button className="btn btn-ghost h-8 p-0 text-sm leading-[22px]" onClick={() => remove.mutate(it.key)}>{tx('remove')}</button>
                         </div>
                       </div>
                       <div className="qty">
-                        <button aria-label="Decrease quantity" disabled={busy || it.quantity <= 1} onClick={() => update.mutate({ key: it.key, quantity: it.quantity - 1 })}>−</button>
+                        <button aria-label={tx('qty_dec')} disabled={busy || it.quantity <= 1} onClick={() => update.mutate({ key: it.key, quantity: it.quantity - 1 })}>−</button>
                         <span>{it.quantity}</span>
-                        <button aria-label="Increase quantity" disabled={busy || it.quantity >= it.quantity_limits.maximum} onClick={() => update.mutate({ key: it.key, quantity: it.quantity + 1 })}>+</button>
+                        <button aria-label={tx('qty_inc')} disabled={busy || it.quantity >= it.quantity_limits.maximum} onClick={() => update.mutate({ key: it.key, quantity: it.quantity + 1 })}>+</button>
                       </div>
                       <b className="price min-w-[90px] text-right">{formatPrice(it.totals.line_subtotal, it.totals)}</b>
                     </div>
@@ -87,30 +89,30 @@ export default function CartPage() {
                 })}
               </div>
               <div className="mt-6 flex items-center justify-between">
-                <Link className="btn btn-ghost" to="/shop">Continue shopping</Link>
+                <Link className="btn btn-ghost" to="/shop">{tx('continue_shopping')}</Link>
               </div>
             </div>
 
             <div className="sum">
-              <h3 className="h4">Order summary</h3>
+              <h3 className="h4">{tx('order_summary')}</h3>
               <form className="mt-4 flex items-center gap-2" onSubmit={e => { e.preventDefault(); if (code.trim()) applyCoupon.mutate(code.trim(), { onSuccess: () => setCode('') }) }}>
-                <input className="input h-11" placeholder="Coupon code" value={code} onChange={e => setCode(e.target.value)} aria-label="Coupon code" />
-                <button className="btn btn-secondary btn-sm" disabled={applyCoupon.isPending}>Apply</button>
+                <input className="input h-11" placeholder={tx('ph_coupon')} value={code} onChange={e => setCode(e.target.value)} aria-label={tx('ph_coupon')} />
+                <button className="btn btn-secondary btn-sm" disabled={applyCoupon.isPending}>{tx('coupon_apply')}</button>
               </form>
               {cart.coupons?.map(c => (
                 <p key={c.code} className="mt-2 flex items-center justify-between text-sm leading-[22px]">
-                  <span>Coupon <b>{c.code}</b></span>
-                  <button className="text-ink-muted underline" onClick={() => removeCoupon.mutate(c.code)}>Remove</button>
+                  <span>{tx('coupon_label')} <b>{c.code}</b></span>
+                  <button className="text-ink-muted underline" onClick={() => removeCoupon.mutate(c.code)}>{tx('remove')}</button>
                 </p>
               ))}
               <div className="mt-4">
-                <div className="sum-r"><span>Subtotal</span><span>{formatPrice(t.total_items, t)}</span></div>
-                <div className="sum-r"><span>Shipping</span><span>{cart.needs_shipping ? 'Calculated at checkout' : 'Not needed'}</span></div>
-                <div className="sum-r"><span>Discount</span><span className="disc">−{formatPrice(discount, t)}</span></div>
-                <div className="sum-r tot"><span>Total</span><span>{formatPrice(Number(t.total_price) - Number(t.total_shipping || 0), t)}</span></div>
+                <div className="sum-r"><span>{tx('sum_subtotal')}</span><span>{formatPrice(t.total_items, t)}</span></div>
+                <div className="sum-r"><span>{tx('sum_shipping')}</span><span>{cart.needs_shipping ? tx('ship_calc') : tx('ship_none')}</span></div>
+                <div className="sum-r"><span>{tx('sum_discount')}</span><span className="disc">−{formatPrice(discount, t)}</span></div>
+                <div className="sum-r tot"><span>{tx('sum_total')}</span><span>{formatPrice(Number(t.total_price) - Number(t.total_shipping || 0), t)}</span></div>
               </div>
-              <Link className="btn btn-primary btn-lg btn-block mt-6" to="/checkout">Proceed to checkout</Link>
-              <p className="mt-3 text-center text-xs leading-[18px] text-ink-muted">Taxes and shipping are shown at checkout.</p>
+              <Link className="btn btn-primary btn-lg btn-block mt-6" to="/checkout">{tx('btn_checkout')}</Link>
+              <p className="mt-3 text-center text-xs leading-[18px] text-ink-muted">{tx('cart_tax_note')}</p>
             </div>
           </div>
         </div>
@@ -119,8 +121,8 @@ export default function CartPage() {
       <section className={`${SECTION} bg-surface-warm`}>
         <div className={WRAP}>
           <div className="mb-10">
-            <span className="font-body text-xs font-semibold leading-4 tracking-[.14em] uppercase text-accent-strong">Complete the look</span>
-            <h2 className="h2 mt-2">Recommended for you</h2>
+            <span className="font-body text-xs font-semibold leading-4 tracking-[.14em] uppercase text-accent-strong">{tx('cart_more_overline')}</span>
+            <h2 className="h2 mt-2">{tx('cart_more_title')}</h2>
           </div>
           <ProductGrid products={more?.items} loading={moreLoading} />
         </div>

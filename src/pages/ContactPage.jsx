@@ -3,10 +3,12 @@ import { Fragment } from 'react'
 import { useSite } from '../api/hooks.js'
 import ContactForm from '../components/ui/ContactForm.jsx'
 import { lines } from '../lib/format.js'
+import { useText } from '../lib/text.js'
 
 const multiline = text => lines(text).map((l, i) => <Fragment key={i}>{i > 0 && <br />}{l}</Fragment>)
 
 export default function ContactPage() {
+  const tx = useText()
   const { data: site } = useSite()
   const o = site?.options || {}
   return (
@@ -29,7 +31,7 @@ export default function ContactPage() {
                 <div className="flex gap-4 items-start">
                   <svg className="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>
                   <div>
-                    <b>Address</b>
+                    <b>{tx('contact_address_label')}</b>
                     <p className="text-ink-muted text-sm leading-[22px]">{multiline(o.contact_address)}</p>
                   </div>
                 </div>
@@ -38,7 +40,7 @@ export default function ContactPage() {
                 <div className="flex gap-4 items-start">
                   <svg className="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
                   <div>
-                    <b>Email</b>
+                    <b>{tx('contact_email_label')}</b>
                     <p className="text-ink-muted text-sm leading-[22px]">{o.contact_email}</p>
                   </div>
                 </div>
@@ -47,7 +49,7 @@ export default function ContactPage() {
                 <div className="flex gap-4 items-start">
                   <svg className="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" /></svg>
                   <div>
-                    <b>Phone</b>
+                    <b>{tx('contact_phone_label')}</b>
                     <p className="text-ink-muted text-sm leading-[22px]">{multiline(o.contact_phone)}</p>
                   </div>
                 </div>

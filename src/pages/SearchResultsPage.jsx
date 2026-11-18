@@ -4,10 +4,12 @@ import ProductGrid from '../components/ui/ProductGrid.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import Pagination from '../components/ui/Pagination.jsx'
 import { useProducts } from '../api/hooks.js'
+import { useText } from '../lib/text.js'
 
-const SUGGESTIONS = ['linen', 'tee', 'boots', 'tote']
+
 
 export default function SearchResultsPage() {
+  const tx = useText()
   const [sp, setSp] = useSearchParams()
   const q = (sp.get('q') || '').trim()
   const page = Number(sp.get('page')) || 1
@@ -32,22 +34,22 @@ export default function SearchResultsPage() {
               key={q}
               defaultValue={q}
               autoFocus
-              placeholder="Search products"
-              aria-label="Search products"
+              placeholder={tx('search_placeholder')}
+              aria-label={tx('search_placeholder')}
               className="h-full flex-1 border-0 bg-transparent text-[22px] outline-none placeholder:text-ink-muted lg:text-[28px]"
             />
-            <button className="btn btn-primary">Search</button>
+            <button className="btn btn-primary">{tx('search_button')}</button>
           </form>
 
           {!q && (
             <div className="mt-6 flex flex-wrap items-center gap-2">
-              <span className="text-sm leading-[22px] text-ink-muted">Try:</span>
-              {SUGGESTIONS.map(s => <Link key={s} className="chip no-underline" to={`/search?q=${s}`}>{s}</Link>)}
+              <span className="text-sm leading-[22px] text-ink-muted">{tx('search_try')}</span>
+              {tx('search_suggestions').split(',').map(s => s.trim()).filter(Boolean).map(s => <Link key={s} className="chip no-underline" to={`/search?q=${s}`}>{s}</Link>)}
             </div>
           )}
 
           {q && !isLoading && !isError && data?.items?.length > 0 && (
-            <p className="mt-4 text-sm leading-[22px] text-ink-muted">{data.total} results for “{q}”</p>
+            <p className="mt-4 text-sm leading-[22px] text-ink-muted">{tx('search_results', { count: data.total, query: q })}</p>
           )}
 
           {q && (

@@ -35,7 +35,7 @@ export default function Footer() {
           <div className="col-span-2 lg:col-span-1">
             {o.footer_news_title && <h4 className="ft-h">{o.footer_news_title}</h4>}
             {o.footer_news_text && <p className="text-sm leading-[22px]">{o.footer_news_text}</p>}
-            <NewsletterForm className="mt-3" buttonClass="btn btn-light" buttonLabel="Join" />
+            <NewsletterForm className="mt-3" buttonClass="btn btn-light" buttonLabel={o.ui_news_button_footer} />
           </div>
         )}
       </div>

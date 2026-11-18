@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { setTextOptions } from '../lib/textStore.js'
 
 // The WordPress address comes from the .env file (VITE_WP_URL).
 export const WP_URL = (import.meta.env.VITE_WP_URL || 'https://headless-live-ecommerce.vercel.app/').replace(/\/$/, '')
@@ -55,6 +56,7 @@ export async function fetchTestimonials() {
 
 export async function fetchSite() {
   const res = await get('/aurelo/v1/site')
+  setTextOptions(res.data?.options)
   return res.data
 }
 

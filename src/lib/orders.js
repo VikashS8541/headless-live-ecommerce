@@ -1,9 +1,6 @@
-const STATUS = {
-  pending: 'Pending payment', processing: 'Processing', 'on-hold': 'On hold', completed: 'Delivered',
-  cancelled: 'Cancelled', refunded: 'Refunded', failed: 'Failed',
-}
+import { tx } from './text.js'
 
-export const statusLabel = s => STATUS[s] || s
+export const statusLabel = s => tx('status_' + String(s).replace(/-/g, '_')) || s
 
 export const money = (n, currency) => (currency === 'INR' ? '₹' : currency + ' ') + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 })
 export const day = iso => (iso ? new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '')

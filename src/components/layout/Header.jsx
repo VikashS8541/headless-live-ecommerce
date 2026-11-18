@@ -5,8 +5,10 @@ import Icon from '../Icon.jsx'
 import { useCart, useSite } from '../../api/hooks.js'
 import { useWishlist } from '../../lib/wishlist.js'
 import { menuItems } from '../../lib/menus.js'
+import { useText } from '../../lib/text.js'
 
 export default function Header() {
+  const tx = useText()
   const [open, setOpen] = useState(false)
   const { data } = useSite()
   const { data: cart } = useCart()
@@ -18,7 +20,7 @@ export default function Header() {
         <div className="flex items-center gap-1">
           <button
             className="icon-btn lg:hidden"
-            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-label={open ? tx('menu_close') : tx('menu_open')}
             aria-expanded={open}
             onClick={() => setOpen(o => !o)}
           >
@@ -28,34 +30,34 @@ export default function Header() {
           </button>
           <Logo />
         </div>
-        <nav className="hidden gap-8 lg:flex" aria-label="Primary">
+        <nav className="hidden gap-8 lg:flex" aria-label={tx('nav_primary')}>
           {NAV.map(item => (
             <NavLink
               key={item.label}
               to={item.to}
               end
-              className={({ isActive }) => `border-b border-transparent py-2 font-heading text-sm font-medium leading-5 no-underline hover:border-ink ${item.label === 'Sale' ? 'text-error' : ''} ${isActive && item.to !== '/shop' ? '!border-ink' : ''}`}
+              className={({ isActive }) => `border-b border-transparent py-2 font-heading text-sm font-medium leading-5 no-underline hover:border-ink ${item.to === '/category/sale' ? 'text-error' : ''} ${isActive && item.to !== '/shop' ? '!border-ink' : ''}`}
             >
               {item.label}
             </NavLink>
           ))}
         </nav>
         <div className="flex items-center justify-end">
-          <Link className="icon-btn" to="/search" aria-label="Search"><Icon name="search" /></Link>
-          <Link className="icon-btn hidden sm:grid" to="/account" aria-label="Account"><Icon name="user" /></Link>
-          <Link className="icon-btn" to="/wishlist" aria-label="Wishlist"><Icon name="heart" />{wishlist.ids.length > 0 && <span className="count">{wishlist.ids.length}</span>}</Link>
-          <Link className="icon-btn" to="/cart" aria-label="Cart"><Icon name="bag" />{cart?.items_count > 0 && <span className="count">{cart.items_count}</span>}</Link>
+          <Link className="icon-btn" to="/search" aria-label={tx('nav_search')}><Icon name="search" /></Link>
+          <Link className="icon-btn hidden sm:grid" to="/account" aria-label={tx('nav_account')}><Icon name="user" /></Link>
+          <Link className="icon-btn" to="/wishlist" aria-label={tx('nav_wishlist')}><Icon name="heart" />{wishlist.ids.length > 0 && <span className="count">{wishlist.ids.length}</span>}</Link>
+          <Link className="icon-btn" to="/cart" aria-label={tx('nav_cart')}><Icon name="bag" />{cart?.items_count > 0 && <span className="count">{cart.items_count}</span>}</Link>
         </div>
       </div>
       {open && (
-        <nav className="absolute inset-x-0 top-full flex flex-col border-b border-border bg-surface px-4 py-2 shadow-md md:px-6 lg:hidden" aria-label="Mobile">
-          {[...NAV, { label: 'Account', to: '/account' }].map(item => (
+        <nav className="absolute inset-x-0 top-full flex flex-col border-b border-border bg-surface px-4 py-2 shadow-md md:px-6 lg:hidden" aria-label={tx('nav_mobile')}>
+          {[...NAV, { label: tx('nav_account'), to: '/account' }].map(item => (
             <NavLink
               key={item.label}
               to={item.to}
               end
               onClick={() => setOpen(false)}
-              className={`flex h-12 items-center border-b border-border font-heading text-sm font-medium no-underline last:border-b-0 ${item.label === 'Sale' ? 'text-error' : ''}`}
+              className={`flex h-12 items-center border-b border-border font-heading text-sm font-medium no-underline last:border-b-0 ${item.to === '/category/sale' ? 'text-error' : ''}`}
             >
               {item.label}
             </NavLink>

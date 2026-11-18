@@ -10,6 +10,7 @@ import { findVariation, normaliseVariations, optionAvailable } from '../lib/vari
 import { errorMessage } from '../api/errors.js'
 import { useWishlist } from '../lib/wishlist.js'
 import { formatPrice, stripHtml } from '../lib/format.js'
+import { useText } from '../lib/text.js'
 
 const OVERLINE = 'font-body text-xs font-semibold leading-4 tracking-[.14em] uppercase text-accent-strong'
 const WRAP = 'mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8'
@@ -40,6 +41,7 @@ export default function ProductPage() {
 }
 
 function ProductDetail({ slug }) {
+  const tx = useText()
   const { data: p, isLoading, isError } = useProduct(slug)
   const { data: site } = useSite()
   const o = site?.options || {}
@@ -75,7 +77,7 @@ function ProductDetail({ slug }) {
     return (
       <Layout>
         <section className={`${WRAP} py-16`}>
-          <EmptyState title="We could not find this product" text="It may have been removed." actionLabel="Continue shopping" actionTo="/shop" />
+          <EmptyState title={tx('product_not_found_title')} text={tx('product_not_found_text')} actionLabel={tx('continue_shopping')} actionTo="/shop" />
         </section>
       </Layout>
     )
@@ -100,7 +102,7 @@ function ProductDetail({ slug }) {
   const reviewCount = p.review_count || 0
   const addToCart = () => {
     const missing = variationAttrs.filter(a => !chosen[a.name])
-    if (missing.length) { setPickError(`Choose ${missing.map(a => a.name.toLowerCase()).join(' and ')} first.`); return }
+    if (missing.length) { setPickError(tx('pick_first', { options: missing.map(a => a.name.toLowerCase()).join(' ' + tx('and') + ' ') })); return }
     setPickError('')
     add.mutate(
       {
@@ -115,16 +117,16 @@ function ProductDetail({ slug }) {
 
   const available = allChosen && picked ? picked.inStock : p.is_in_stock
   const stock = !available
-    ? { cls: 'msg err', text: 'Out of stock' }
+    ? { cls: 'msg err', text: tx('stock_out') }
     : p.low_stock_remaining
-      ? { cls: 'msg ok', text: `In stock · only ${p.low_stock_remaining} left` }
-      : { cls: 'msg ok', text: 'In stock' }
+      ? { cls: 'msg ok', text: tx('stock_low', { count: p.low_stock_remaining }) }
+      : { cls: 'msg ok', text: tx('stock_in') }
 
   return (
     <Layout>
       <div className={`${WRAP} pt-6`}>
-        <nav className="crumbs" aria-label="Breadcrumb">
-          <Link to="/">Home</Link><Chevron />
+        <nav className="crumbs" aria-label={tx('bc_label')}>
+          <Link to="/">{tx('bc_home')}</Link><Chevron />
           {catSlug && <><Link to={`/category/${catSlug}`}>{stripHtml(p.categories[0].name)}</Link><Chevron /></>}
           <span aria-current="page">{name}</span>
         </nav>
@@ -158,8 +160,8 @@ function ProductDetail({ slug }) {
               <h1 className="h2 mt-2">{name}</h1>
               <div className="mt-3">
                 {reviewCount > 0
-                  ? <button className="bg-transparent p-0" onClick={() => { setTab('reviews'); document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' }) }}><Stars value={p.average_rating} label={`${Number(p.average_rating).toFixed(1)} (${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'})`} /></button>
-                  : <Stars value={0} label="No reviews yet" />}
+                  ? <button className="bg-transparent p-0" onClick={() => { setTab('reviews'); document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' }) }}><Stars value={p.average_rating} label={`${Number(p.average_rating).toFixed(1)} (${reviewCount} ${reviewCount === 1 ? tx('review_one') : tx('review_many')})`} /></button>
+                  : <Stars value={0} label={tx('reviews_none')} />}
               </div>
             </div>
             <span className="prices">
@@ -191,22 +193,22 @@ function ProductDetail({ slug }) {
             {available && (!showFrom) && (
               <p className="text-sm leading-[22px]" aria-live="polite">
                 {qty > 1 && <span className="text-ink-muted">{formatPrice(unit, prices)} × {qty} = </span>}
-                <b>Total {formatPrice(unit * qty, prices)}</b>
+                <b>{tx('prod_total', { price: formatPrice(unit * qty, prices) })}</b>
               </p>
             )}
 
             <div className="flex items-center gap-3">
               <div className="qty">
-                <button onClick={() => setQty(q => Math.max(1, q - 1))} aria-label="Decrease quantity">−</button>
+                <button onClick={() => setQty(q => Math.max(1, q - 1))} aria-label={tx('qty_dec')}>−</button>
                 <span>{qty}</span>
-                <button onClick={() => setQty(q => q + 1)} aria-label="Increase quantity">+</button>
+                <button onClick={() => setQty(q => q + 1)} aria-label={tx('qty_inc')}>+</button>
               </div>
               <button className={`btn btn-primary btn-lg flex-1 ${add.isPending ? 'is-loading' : ''}`} disabled={!available || add.isPending} onClick={addToCart}>
-                {!available ? 'Sold out' : add.isPending ? 'Adding' : added ? 'Added' : !showFrom ?`Add to cart · ${formatPrice(unit * qty, prices)}` : 'Add to cart'}
+                {!available ? tx('btn_soldout') : add.isPending ? tx('btn_adding') : added ? tx('btn_added') : !showFrom ? tx('btn_add_price', { price: formatPrice(unit * qty, prices) }) : tx('btn_add')}
               </button>
               <button
                 className="icon-btn border border-border-strong"
-                aria-label={wishlist.has(p.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                aria-label={wishlist.has(p.id) ? tx('wishlist_remove') : tx('wishlist_add')}
                 aria-pressed={wishlist.has(p.id)}
                 onClick={() => wishlist.toggle(p.id)}
               >
@@ -215,9 +217,9 @@ function ProductDetail({ slug }) {
             </div>
             {(pickError || add.isError) && <p className="msg err" role="alert">{pickError || errorMessage(add.error)}</p>}
             {added && (
-              <p className="msg ok" role="status">Added to your cart. <Link to="/cart">View cart</Link></p>
+              <p className="msg ok" role="status">{tx('added_msg')} <Link to="/cart">{tx('view_cart')}</Link></p>
             )}
-            <Link className="btn btn-secondary btn-lg btn-block" to="/cart">Go to cart</Link>
+            <Link className="btn btn-secondary btn-lg btn-block" to="/cart">{tx('go_cart')}</Link>
             {(o.product_note1 || o.product_note2) && (
               <div className="card flex flex-col gap-3">
                 {o.product_note1 && <span className="text-sm leading-[22px]">{o.product_note1}</span>}
@@ -231,7 +233,7 @@ function ProductDetail({ slug }) {
       <section id="reviews" className="bg-surface-warm py-12 md:py-16">
         <div className={WRAP}>
           <div className="tabs" role="tablist">
-            {[['description', 'Description'], ['specs', 'Specifications'], ...(o.product_shipping_text ? [['shipping', 'Shipping and returns']] : []), ['reviews', `Reviews (${reviewCount})`]].map(([k, label]) => (
+            {[['description', tx('tab_description')], ['specs', tx('tab_specs')], ...(o.product_shipping_text ? [['shipping', tx('tab_shipping')]] : []), ['reviews', tx('tab_reviews', { count: reviewCount })]].map(([k, label]) => (
               <button key={k} role="tab" aria-selected={tab === k} className={`tab ${tab === k ? 'on' : ''}`} onClick={() => setTab(k)}>{label}</button>
             ))}
           </div>
@@ -242,10 +244,10 @@ function ProductDetail({ slug }) {
             {tab === 'specs' && (
               <table className="tbl max-w-[760px]">
                 <tbody>
-                  {p.sku && <tr><td className="text-ink-muted">SKU</td><td>{p.sku}</td></tr>}
+                  {p.sku && <tr><td className="text-ink-muted">{tx('spec_sku')}</td><td>{p.sku}</td></tr>}
                   {specAttrs.map(a => <tr key={a.name}><td className="text-ink-muted">{a.name}</td><td>{a.terms.map(t => t.name).join(', ')}</td></tr>)}
-                  {p.weight && <tr><td className="text-ink-muted">Weight</td><td>{p.weight}</td></tr>}
-                  {p.dimensions?.length ? <tr><td className="text-ink-muted">Size</td><td>{p.dimensions.length} × {p.dimensions.width} × {p.dimensions.height}</td></tr> : null}
+                  {p.weight && <tr><td className="text-ink-muted">{tx('spec_weight')}</td><td>{p.weight}</td></tr>}
+                  {p.dimensions?.length ? <tr><td className="text-ink-muted">{tx('spec_size')}</td><td>{p.dimensions.length} × {p.dimensions.width} × {p.dimensions.height}</td></tr> : null}
                 </tbody>
               </table>
             )}
@@ -260,9 +262,9 @@ function ProductDetail({ slug }) {
                   <div key={r.id} className="border-b border-border pb-6">
                     <Stars value={r.rating} />
                     <Html className="mt-2 text-ink-muted" html={r.review} />
-                    <p className="mt-2 text-xs leading-[18px] text-ink-muted">{r.reviewer}{r.verified ? ' · Verified buyer' : ''}</p>
+                    <p className="mt-2 text-xs leading-[18px] text-ink-muted">{r.reviewer}{r.verified ? ' · ' + tx('verified_buyer') : ''}</p>
                   </div>
-                )) : <p className="text-ink-muted">No reviews yet.</p>}
+                )) : <p className="text-ink-muted">{tx('reviews_none')}</p>}
               </div>
             )}
           </div>
@@ -273,8 +275,8 @@ function ProductDetail({ slug }) {
         <section className="py-12 md:py-16 lg:py-24">
           <div className={WRAP}>
             <div className="mb-10">
-              <span className={OVERLINE}>You may also like</span>
-              <h2 className="h2 mt-2">Related products</h2>
+              <span className={OVERLINE}>{tx('related_overline')}</span>
+              <h2 className="h2 mt-2">{tx('related_title')}</h2>
             </div>
             <ProductGrid products={relatedItems} loading={relLoading} />
           </div>
@@ -285,8 +287,8 @@ function ProductDetail({ slug }) {
         <section className="bg-surface-warm py-12 md:py-16 lg:py-24">
           <div className={WRAP}>
             <div className="mb-10">
-              <span className={OVERLINE}>Recently viewed</span>
-              <h2 className="h2 mt-2">Pick up where you left off</h2>
+              <span className={OVERLINE}>{tx('recent_overline')}</span>
+              <h2 className="h2 mt-2">{tx('recent_title')}</h2>
             </div>
             <ProductGrid products={recentData.items} />
           </div>

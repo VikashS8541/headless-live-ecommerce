@@ -3,10 +3,12 @@ import Layout from '../components/layout/Layout.jsx'
 import Accordion from '../components/Accordion.jsx'
 import { useFaqs, useSite } from '../api/hooks.js'
 import { stripHtml } from '../lib/format.js'
+import { useText } from '../lib/text.js'
 
 const WRAP = 'mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8'
 
 export default function FAQPage() {
+  const tx = useText()
   const { data, isLoading } = useFaqs()
   const { data: site } = useSite()
   const o = site?.options || {}
@@ -28,8 +30,8 @@ export default function FAQPage() {
         <div className={WRAP}>
           {!isLoading && items.length === 0 && !cat ? null : (
             <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[240px_1fr] lg:gap-16">
-              <nav className="snav flex gap-1 overflow-x-auto lg:block" aria-label="FAQ categories">
-                <button className={`flex h-12 shrink-0 items-center whitespace-nowrap rounded-sm px-4 text-left font-heading text-sm font-medium ${cat === 0 ? 'bg-brand text-on-brand' : 'hover:bg-surface-warm'}`} onClick={() => setCat(0)}>All</button>
+              <nav className="snav flex gap-1 overflow-x-auto lg:block" aria-label={tx('faq_categories')}>
+                <button className={`flex h-12 shrink-0 items-center whitespace-nowrap rounded-sm px-4 text-left font-heading text-sm font-medium ${cat === 0 ? 'bg-brand text-on-brand' : 'hover:bg-surface-warm'}`} onClick={() => setCat(0)}>{tx('faq_all')}</button>
                 {categories.map(c => (
                   <button key={c.id} className={`flex h-12 shrink-0 items-center whitespace-nowrap rounded-sm px-4 text-left font-heading text-sm font-medium ${cat === c.id ? 'bg-brand text-on-brand' : 'hover:bg-surface-warm'}`} onClick={() => setCat(c.id)}>{stripHtml(c.name)}</button>
                 ))}

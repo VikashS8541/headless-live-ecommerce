@@ -1,13 +1,14 @@
 import { formatPrice, stripHtml } from './format.js'
+import { tx } from './text.js'
 
 /** Turns one WooCommerce product (Store API shape) into a ProductCard. */
 export function cardProps(p) {
   const prices = p.prices || {}
   const onSale = p.on_sale && Number(prices.regular_price) > Number(prices.price)
   const badges = []
-  if (onSale) badges.push({ kind: 'b-sale', text: 'Sale' })
-  if (!p.is_in_stock) badges.push({ kind: 'b-out', text: 'Sold out' })
-  else if (p.low_stock_remaining) badges.push({ kind: 'b-low', text: `Only ${p.low_stock_remaining} left` })
+  if (onSale) badges.push({ kind: 'b-sale', text: tx('badge_sale') })
+  if (!p.is_in_stock) badges.push({ kind: 'b-out', text: tx('badge_soldout') })
+  else if (p.low_stock_remaining) badges.push({ kind: 'b-low', text: tx('badge_low', { count: p.low_stock_remaining }) })
   return {
     id: p.id,
     name: stripHtml(p.name),

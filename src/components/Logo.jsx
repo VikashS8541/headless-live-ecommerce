@@ -19,7 +19,7 @@ export default function Logo({ size = 28, inverse = false, to = '/' }) {
     )
   if (!to) return <span className="logo">{mark}</span>
   return (
-    <Link to={to} className="logo no-underline" aria-label={o.logo_text || 'Home'}>
+    <Link to={to} className="logo no-underline" aria-label={o.logo_text || o.ui_home_label}>
       {mark}
     </Link>
   )

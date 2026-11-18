@@ -3,15 +3,16 @@ import { useCategories, useProducts } from '../../api/hooks.js'
 import { stripHtml } from '../../lib/format.js'
 import ProductGrid from './ProductGrid.jsx'
 import Pagination from './Pagination.jsx'
+import { useText } from '../../lib/text.js'
 
 const PER_PAGE = 9
 
 const SORTS = {
-  featured: { label: 'Featured', params: { orderby: 'menu_order', order: 'asc' } },
-  newest: { label: 'Newest', params: { orderby: 'date', order: 'desc' } },
-  'price-asc': { label: 'Price low to high', params: { orderby: 'price', order: 'asc' } },
-  'price-desc': { label: 'Price high to low', params: { orderby: 'price', order: 'desc' } },
-  rating: { label: 'Top rated', params: { orderby: 'rating', order: 'desc' } },
+  featured: { label: 'sort_featured', params: { orderby: 'menu_order', order: 'asc' } },
+  newest: { label: 'sort_newest', params: { orderby: 'date', order: 'desc' } },
+  'price-asc': { label: 'sort_price_asc', params: { orderby: 'price', order: 'asc' } },
+  'price-desc': { label: 'sort_price_desc', params: { orderby: 'price', order: 'desc' } },
+  rating: { label: 'sort_rating', params: { orderby: 'rating', order: 'desc' } },
 }
 
 /**
@@ -20,6 +21,7 @@ const SORTS = {
  * Filters live in the address bar (?sort=&page=&instock=1&min=&max=) so links can be shared.
  */
 export default function ProductListing({ categorySlug }) {
+  const tx = useText()
   const [sp, setSp] = useSearchParams()
   const sort = SORTS[sp.get('sort')] ? sp.get('sort') : 'featured'
   const page = Number(sp.get('page')) || 1
@@ -55,9 +57,9 @@ export default function ProductListing({ categorySlug }) {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr] lg:gap-12">
           <aside className="filters">
             <div className="fgrp">
-              <h5>Category</h5>
+              <h5>{tx('filter_category')}</h5>
               <ul>
-                <li><Link to="/shop" className={`no-underline ${!categorySlug ? 'font-semibold' : ''}`}>All products</Link></li>
+                <li><Link to="/shop" className={`no-underline ${!categorySlug ? 'font-semibold' : ''}`}>{tx('filter_all')}</Link></li>
                 {topCats.map(c => (
                   <li key={c.id}>
                     <Link to={`/category/${c.slug}`} className={`no-underline ${categorySlug === c.slug ? 'font-semibold' : ''}`}>
@@ -65,24 +67,24 @@ export default function ProductListing({ categorySlug }) {
                     </Link>
                   </li>
                 ))}
-                <li><Link to="/category/sale" className={`no-underline ${categorySlug === 'sale' ? 'font-semibold' : ''}`}>Sale</Link></li>
+                <li><Link to="/category/sale" className={`no-underline ${categorySlug === 'sale' ? 'font-semibold' : ''}`}>{tx('filter_sale')}</Link></li>
               </ul>
             </div>
             <div className="fgrp">
-              <h5>Price (₹)</h5>
+              <h5>{tx('filter_price')}</h5>
               <div className="flex items-center gap-2">
-                <input className="input h-11" type="number" min="0" placeholder="Min" defaultValue={min} key={'min' + min}
+                <input className="input h-11" type="number" min="0" placeholder={tx('ph_min')} defaultValue={min} key={'min' + min}
                   onBlur={e => update({ min: e.target.value })} />
-                <input className="input h-11" type="number" min="0" placeholder="Max" defaultValue={max} key={'max' + max}
+                <input className="input h-11" type="number" min="0" placeholder={tx('ph_max')} defaultValue={max} key={'max' + max}
                   onBlur={e => update({ max: e.target.value })} />
               </div>
             </div>
             <div className="fgrp">
-              <h5>Availability</h5>
+              <h5>{tx('filter_avail')}</h5>
               <ul>
                 <li>
                   <label className="chk">
-                    <input type="checkbox" checked={inStock} onChange={e => update({ instock: e.target.checked ? '1' : '' })} />In stock only
+                    <input type="checkbox" checked={inStock} onChange={e => update({ instock: e.target.checked ? '1' : '' })} />{tx('filter_instock')}
                   </label>
                 </li>
               </ul>
@@ -91,10 +93,10 @@ export default function ProductListing({ categorySlug }) {
           <div>
             <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
               <span className="text-sm leading-[22px] text-ink-muted">
-                {isLoading ? 'Loading products…' : `${data?.total ?? 0} products`}
+                {isLoading ? tx('loading_products') : tx('products_count', { count: data?.total ?? 0 })}
               </span>
-              <select className="select h-11 w-full sm:w-[220px]" value={sort} onChange={e => update({ sort: e.target.value === 'featured' ? '' : e.target.value })} aria-label="Sort products">
-                {Object.entries(SORTS).map(([k, s]) => <option key={k} value={k}>Sort: {s.label}</option>)}
+              <select className="select h-11 w-full sm:w-[220px]" value={sort} onChange={e => update({ sort: e.target.value === 'featured' ? '' : e.target.value })} aria-label={tx('sort_label')}>
+                {Object.entries(SORTS).map(([k, s]) => <option key={k} value={k}>{tx('sort_prefix', { label: tx(s.label) })}</option>)}
               </select>
             </div>
             <div className={isFetching && !isLoading ? 'opacity-60 transition-opacity' : ''}>
@@ -104,8 +106,8 @@ export default function ProductListing({ categorySlug }) {
                 error={isError}
                 columns={3}
                 skeletons={6}
-                emptyTitle="No products found"
-                emptyText="Try removing a filter, or add products in WordPress."
+                emptyTitle={tx('listing_empty_title')}
+                emptyText={tx('listing_empty_text')}
               />
             </div>
             <Pagination page={page} totalPages={data?.totalPages} onChange={n => update({ page: String(n) })} />
