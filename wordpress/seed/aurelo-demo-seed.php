@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Aurelo Demo Seed (one-time)
  * Description: Fills the demo shop with Aurelo products, categories, pages, FAQs, testimonials, menus and images.
- *              Runs only when http://headless-ecommerce.local/?aurelo_seed=aurelo-demo-2026 is opened from this
+ *              Runs only when https://headless-live-ecommerce.vercel.app//?aurelo_seed=aurelo-demo-2026 is opened from this
  *              computer. Safe to run again: it updates by SKU / slug instead of duplicating.
  */
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * One-time demo update: size-based prices and customer reviews (star ratings) on the demo products.
- * Run once from this computer: http://headless-ecommerce.local/?aurelo_seed2=aurelo-demo-2026
+ * Run once from this computer: https://headless-live-ecommerce.vercel.app//?aurelo_seed2=aurelo-demo-2026
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

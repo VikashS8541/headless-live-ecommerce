@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // The WordPress address comes from the .env file (VITE_WP_URL).
-export const WP_URL = (import.meta.env.VITE_WP_URL || 'http://headless-ecommerce.local').replace(/\/$/, '')
+export const WP_URL = (import.meta.env.VITE_WP_URL || 'https://headless-live-ecommerce.vercel.app/').replace(/\/$/, '')
 
 const http = axios.create({ baseURL: `${WP_URL}/wp-json`, timeout: 15000 })
 

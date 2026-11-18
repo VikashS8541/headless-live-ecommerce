@@ -15,6 +15,6 @@ add_filter( 'allowed_http_origins', function ( $origins ) {
 		'http://127.0.0.1:5173',
 		'http://localhost:4173',   // npm run preview
 		'http://127.0.0.1:4173',
-		// 'https://your-live-storefront.com',  // add the real site address before going live
+		'https://headless-live-ecommerce.vercel.app',   // Vercel live storefront
 	) );
 } );
